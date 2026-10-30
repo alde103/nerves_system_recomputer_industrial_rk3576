@@ -1,0 +1,7 @@
+config BR2_PACKAGE_WQ9201S_FIRMWARE
+	bool "wq9201s-firmware"
+	help
+	  Firmware and board settings for the WuQi WQ9201S WiFi/BT module,
+	  from Seeed's wq9201s-wifi-bt-dkms package.
+
+	  https://github.com/Seeed-Studio/seeed_armbian_extension/tree/deb_source/wq9201s-wifi-bt-dkms

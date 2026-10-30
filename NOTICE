@@ -8,8 +8,11 @@ texts are in LICENSES/.
 | Build configuration, fwup configs, scripts, docs (this project's own files) | GPL-2.0-or-later |
 | `uboot/u-boot-rockchip.bin` (committed binary) | GPL-2.0-or-later (U-Boot; corresponding source and build recipe in `scripts/build-uboot.sh`) + Rockchip proprietary blobs (RK3576 DDR init, boost, BL31 from armbian/rkbin — LICENSES/LICENSE.rockchip-rkbin, redistributable on Rockchip SoCs) |
 | `uboot/rk3576_spl_loader_v1.03.102.bin` (committed binary) | Rockchip proprietary (rkbin components — LICENSES/LICENSE.rockchip-rkbin) |
+| `package/wq9201s-wifi/src/` (WQ9201S WiFi driver, vendored from Seeed's wq9201s-wifi-bt-dkms) | GPL-2.0-or-later (WuQi Micro, see `package/wq9201s-wifi/src/copyright`) |
 
-Downloaded at build time (not in this repository): the Linux kernel
+Downloaded at build time (not in this repository): the WQ9201S WiFi/BT
+firmware and settings (WuQi Micro proprietary, redistributed by Seeed with the
+vendor's permission for use with WQ9201S modules), the Linux kernel
 (GPL-2.0-only) and Buildroot packages (various). Built firmware images
 therefore contain proprietary firmware alongside GPL components, as is usual
 for embedded Linux board support.

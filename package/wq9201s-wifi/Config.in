@@ -1,0 +1,12 @@
+config BR2_PACKAGE_WQ9201S_WIFI
+	bool "wq9201s-wifi"
+	depends on BR2_LINUX_KERNEL
+	select BR2_PACKAGE_WQ9201S_FIRMWARE
+	help
+	  Driver (wq_wlan) for the WuQi WQ9201S SDIO WiFi module
+	  on the Seeed reComputer Industrial RK3576.
+
+	  https://github.com/Seeed-Studio/seeed_armbian_extension/tree/deb_source/wq9201s-wifi-bt-dkms
+
+comment "wq9201s-wifi needs a Linux kernel to be built"
+	depends on !BR2_LINUX_KERNEL

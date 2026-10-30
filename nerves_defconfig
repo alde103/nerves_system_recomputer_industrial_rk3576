@@ -80,3 +80,8 @@ BR2_PACKAGE_NERVES_CONFIG_ACCEPT_RNG_NOTICE=y
 # from the application side.
 BR2_ROOTFS_DEVICE_CREATION_DYNAMIC_EUDEV=y
 BR2_PACKAGE_LIBINPUT=y
+# Onboard WiFi: WuQi WQ9201S (Quectel FCS960K) on SDIO, driven by the
+# out-of-tree wq_wlan module (package/wq9201s-wifi). It has no modalias;
+# rootfs_overlay/usr/sbin/load-board-modules loads it at boot. Bluetooth
+# (hci_uart on ttyS4) is not brought up.
+BR2_PACKAGE_WQ9201S_WIFI=y

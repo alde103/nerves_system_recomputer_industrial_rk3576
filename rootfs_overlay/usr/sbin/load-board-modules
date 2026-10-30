@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# Board setup that has to happen before Erlang starts. erlinit runs a single
+# --pre-run-exec, so this is it, and it hands over to expand-app-fs at the end.
+#
+# The WQ9201S WiFi driver has no modalias - the module's SDIO function shows up
+# before its firmware is loaded and carries nothing that maps to wq_wlan - so
+# nothing loads it on demand. Load it here, in the background: it downloads
+# firmware over SDIO and must not hold up the boot. wlan0 appears when it is
+# done, and VintageNet picks it up from there.
+
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+
+modprobe wq_wlan </dev/null >/dev/null 2>&1 &
+
+exec /usr/sbin/expand-app-fs

@@ -125,6 +125,26 @@ EOF
     esac
 }
 
+# check_target_file PATH: PATH is in the rootfs.
+check_target_file() {
+    [ -e "$ARTIFACT_DIR/target$1" ] || fail "check_target_file: $1 is not in the rootfs"
+    ok "check_target_file $1"
+}
+
+# check_module_vermagic MODULE: the out-of-tree MODULE was built for the
+# kernel that ships; a mismatch makes modprobe refuse it on the device.
+check_module_vermagic() {
+    local release module vermagic
+    release=$(cat "$KERNEL_DIR/include/config/kernel.release")
+    module=$(find "$ARTIFACT_DIR/target/lib/modules/$release" -name "$1.ko" | head -1)
+    [ -n "$module" ] || fail "check_module_vermagic: no $1.ko under /lib/modules/$release"
+    vermagic=$(strings "$module" | sed -n 's/^vermagic=//p')
+    case "$vermagic" in
+    "$release "*) ok "check_module_vermagic $1 ($release)" ;;
+    *) fail "check_module_vermagic: $1 has vermagic '$vermagic', kernel is $release" ;;
+    esac
+}
+
 check_defconfig_clean
 check_names_consistent
 check_bootloader
@@ -156,3 +176,9 @@ check_kernel_config CONFIG_TUN y
 # WiFi: cfg80211 as a module so it loads after the rootfs has regulatory.db
 check_kernel_config CONFIG_CFG80211 m
 
+# WiFi: WQ9201S driver, its firmware and settings, and the boot-time loader
+# (the module has no modalias, so nothing else would load it)
+check_module_vermagic wq_wlan
+check_target_file /lib/firmware/wq9201_fw_wifi_1_1_sdio.bin
+check_target_file /lib/firmware/wq_wlan_settings.ini
+check_target_file /usr/sbin/load-board-modules

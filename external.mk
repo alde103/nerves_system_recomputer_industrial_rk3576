@@ -66,10 +66,23 @@ NERVES_LINUX_PATCH_HASH = \
 	$(call nerves-hash,$(sort $(wildcard $(NERVES_DEFCONFIG_DIR)/linux/*.patch)))
 NERVES_LINUX_PATCH_STAMP = $(LINUX_DIR)/.nerves-linux-patch-hash
 
+# The WiFi driver: its source lives in this tree (SITE_METHOD = local), so
+# extract is an rsync, and its makefile decides which firmware is installed.
+NERVES_WQ9201S_HASH = \
+	$(call nerves-hash,$(sort $(shell find $(NERVES_DEFCONFIG_DIR)/package/wq9201s-wifi -type f)))
+NERVES_WQ9201S_DIR = $(BUILD_DIR)/wq9201s-wifi-$(WQ9201S_WIFI_VERSION)
+NERVES_WQ9201S_STAMP = $(NERVES_WQ9201S_DIR)/.nerves-pkg-hash
+
 NERVES_STALE_DISCARDED := \
-	$(call nerves-discard-if-stale,$(LINUX_DIR),$(NERVES_LINUX_PATCH_STAMP),$(NERVES_LINUX_PATCH_HASH))
+	$(call nerves-discard-if-stale,$(LINUX_DIR),$(NERVES_LINUX_PATCH_STAMP),$(NERVES_LINUX_PATCH_HASH)) \
+	$(call nerves-discard-if-stale,$(NERVES_WQ9201S_DIR),$(NERVES_WQ9201S_STAMP),$(NERVES_WQ9201S_HASH))
 
 define NERVES_LINUX_RECORD_PATCH_HASH
 	echo $(NERVES_LINUX_PATCH_HASH) > $(NERVES_LINUX_PATCH_STAMP)
 endef
 LINUX_POST_PATCH_HOOKS += NERVES_LINUX_RECORD_PATCH_HASH
+
+define NERVES_WQ9201S_RECORD_HASH
+	echo $(NERVES_WQ9201S_HASH) > $(NERVES_WQ9201S_STAMP)
+endef
+WQ9201S_WIFI_POST_RSYNC_HOOKS += NERVES_WQ9201S_RECORD_HASH
