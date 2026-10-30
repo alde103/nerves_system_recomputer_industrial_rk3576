@@ -6,8 +6,8 @@ texts are in LICENSES/.
 | Content | License |
 | --- | --- |
 | Build configuration, fwup configs, scripts, docs (this project's own files) | GPL-2.0-or-later |
-| `uboot/u-boot-rockchip.bin` (committed binary) | GPL-2.0-or-later (U-Boot; corresponding source and build recipe in `scripts/build-uboot.sh`) + Rockchip proprietary blobs (RK3576 DDR init, BL31 from rkbin — LICENSES/LICENSE.rockchip-rkbin, redistributable on Rockchip SoCs) |
-| `uboot/rk3576_spl_loader_*.bin` (committed binary) | Rockchip proprietary (rkbin components — LICENSES/LICENSE.rockchip-rkbin) |
+| `uboot/u-boot-rockchip.bin` (committed binary) | GPL-2.0-or-later (U-Boot; corresponding source and build recipe in `scripts/build-uboot.sh`) + Rockchip proprietary blobs (RK3576 DDR init, boost, BL31 from armbian/rkbin — LICENSES/LICENSE.rockchip-rkbin, redistributable on Rockchip SoCs) |
+| `uboot/rk3576_spl_loader_v1.03.102.bin` (committed binary) | Rockchip proprietary (rkbin components — LICENSES/LICENSE.rockchip-rkbin) |
 
 Downloaded at build time (not in this repository): the Linux kernel
 (GPL-2.0-only) and Buildroot packages (various). Built firmware images

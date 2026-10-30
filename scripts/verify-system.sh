@@ -56,9 +56,16 @@ $consoles"
     ok check_names_consistent
 }
 
+# The committed bootloader: idblock, FIT with BL31, Nerves env location.
+check_bootloader() {
+    "$SYSTEM_DIR/scripts/build-uboot.sh" --verify >/dev/null || fail "check_bootloader"
+    ok check_bootloader
+}
+
 if [ "${1:-}" = "--static" ]; then
     check_defconfig_clean
     check_names_consistent
+    check_bootloader
     exit 0
 fi
 
@@ -120,6 +127,7 @@ EOF
 
 check_defconfig_clean
 check_names_consistent
+check_bootloader
 
 check_dtb_alias mmc0 dwcmshc
 
