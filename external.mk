@@ -1,15 +1,6 @@
 # Include system-specific packages
 include $(sort $(wildcard $(NERVES_DEFCONFIG_DIR)/package/*/*.mk))
 
-# Buildroot 2026.05 hard-requires LLVM in the target Mesa for panfrost
-# (Config.in), but the only LLVM consumer in this driver set is the
-# gallium software 'draw' module, which panfrost never uses. Turn it off
-# so libgallium does not link libLLVM; post-build.sh then removes the
-# orphaned library from the rootfs. CONF_OPTS is expanded when the
-# configure rule runs, so appending here (external.mk is parsed after
-# package makefiles) takes effect.
-MESA3D_CONF_OPTS += -Ddraw-use-llvm=false
-
 # Buildroot sets a package's source up once, when it first extracts it, and
 # keeps nothing that would notice the inputs to that step changing afterwards.
 # It rebuilds from the tree it already has and reports success, so an edited
@@ -75,52 +66,10 @@ NERVES_LINUX_PATCH_HASH = \
 	$(call nerves-hash,$(sort $(wildcard $(NERVES_DEFCONFIG_DIR)/linux/*.patch)))
 NERVES_LINUX_PATCH_STAMP = $(LINUX_DIR)/.nerves-linux-patch-hash
 
-# The NPU driver: its sources are downloaded, but package/rknpu-driver/*.patch
-# is what makes them build against mainline, and it is applied at extract too.
-NERVES_RKNPU_PATCH_HASH = \
-	$(call nerves-hash,$(sort $(wildcard $(NERVES_DEFCONFIG_DIR)/package/rknpu-driver/*.patch)))
-NERVES_RKNPU_DIR = $(BUILD_DIR)/rknpu-driver-$(RKNPU_DRIVER_VERSION)
-NERVES_RKNPU_STAMP = $(NERVES_RKNPU_DIR)/.nerves-patch-hash
-
-# The WiFi/BT firmware: the files are downloads, but which files and where they
-# are installed is decided by the package makefile in this tree, so that is the
-# input to hash. Adding a firmware blob to it otherwise changes nothing until
-# the build directory is thrown away.
-NERVES_BRCMFW_HASH = \
-	$(call nerves-hash,$(sort $(wildcard $(NERVES_DEFCONFIG_DIR)/package/brcmfmac43752-firmware/*)))
-NERVES_BRCMFW_DIR = \
-	$(BUILD_DIR)/brcmfmac43752-firmware-$(BRCMFMAC43752_FIRMWARE_VERSION)
-NERVES_BRCMFW_STAMP = $(NERVES_BRCMFW_DIR)/.nerves-pkg-hash
-
-# optee-key: its source lives in this tree (SITE_METHOD = local), so extract is
-# a copy.
-NERVES_OPTEE_KEY_HASH = \
-	$(call nerves-hash,$(sort $(wildcard $(NERVES_DEFCONFIG_DIR)/package/optee-key/src/*)))
-NERVES_OPTEE_KEY_DIR = $(BUILD_DIR)/optee-key-$(OPTEE_KEY_VERSION)
-NERVES_OPTEE_KEY_STAMP = $(NERVES_OPTEE_KEY_DIR)/.nerves-src-hash
-
 NERVES_STALE_DISCARDED := \
-	$(call nerves-discard-if-stale,$(LINUX_DIR),$(NERVES_LINUX_PATCH_STAMP),$(NERVES_LINUX_PATCH_HASH)) \
-	$(call nerves-discard-if-stale,$(NERVES_RKNPU_DIR),$(NERVES_RKNPU_STAMP),$(NERVES_RKNPU_PATCH_HASH)) \
-	$(call nerves-discard-if-stale,$(NERVES_BRCMFW_DIR),$(NERVES_BRCMFW_STAMP),$(NERVES_BRCMFW_HASH)) \
-	$(call nerves-discard-if-stale,$(NERVES_OPTEE_KEY_DIR),$(NERVES_OPTEE_KEY_STAMP),$(NERVES_OPTEE_KEY_HASH))
-
-define OPTEE_KEY_RECORD_SRC_HASH
-	echo $(NERVES_OPTEE_KEY_HASH) > $(NERVES_OPTEE_KEY_STAMP)
-endef
-OPTEE_KEY_POST_EXTRACT_HOOKS += OPTEE_KEY_RECORD_SRC_HASH
+	$(call nerves-discard-if-stale,$(LINUX_DIR),$(NERVES_LINUX_PATCH_STAMP),$(NERVES_LINUX_PATCH_HASH))
 
 define NERVES_LINUX_RECORD_PATCH_HASH
 	echo $(NERVES_LINUX_PATCH_HASH) > $(NERVES_LINUX_PATCH_STAMP)
 endef
 LINUX_POST_PATCH_HOOKS += NERVES_LINUX_RECORD_PATCH_HASH
-
-define NERVES_RKNPU_RECORD_PATCH_HASH
-	echo $(NERVES_RKNPU_PATCH_HASH) > $(NERVES_RKNPU_STAMP)
-endef
-RKNPU_DRIVER_POST_PATCH_HOOKS += NERVES_RKNPU_RECORD_PATCH_HASH
-
-define NERVES_BRCMFW_RECORD_HASH
-	echo $(NERVES_BRCMFW_HASH) > $(NERVES_BRCMFW_STAMP)
-endef
-BRCMFMAC43752_FIRMWARE_POST_EXTRACT_HOOKS += NERVES_BRCMFW_RECORD_HASH

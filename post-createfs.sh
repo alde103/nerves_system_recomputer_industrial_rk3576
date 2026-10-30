@@ -10,7 +10,7 @@ $BR2_EXTERNAL_NERVES_PATH/board/nerves-common/post-createfs.sh $TARGET_DIR $FWUP
 # Drop the previous build's portable artifact before this one's is written.
 #
 # The container build volume is buildroot's output directory, and every build
-# adds a ~390 MB nerves_system_sige5-portable-*.tar.gz to it while removing
+# adds a ~390 MB nerves_system_*-portable-*.tar.gz to it while removing
 # none of the earlier ones. Left to itself that is unbounded: 104 tarballs and
 # 39 GB once, then 7 more on a volume that had reached 100 GB on disk.
 #
@@ -30,7 +30,7 @@ $BR2_EXTERNAL_NERVES_PATH/board/nerves-common/post-createfs.sh $TARGET_DIR $FWUP
 # This only holds the line. The volume's backing file is sparse and grows to
 # its high-water mark, and the guest's virtio-blk device has no discard
 # support, so freed blocks are reused rather than returned - space already lost
-# needs the volume deleted. See tools/prune-build-volume.sh.
+# needs the volume deleted.
 BUILD_ROOT=${BASE_DIR:-${BINARIES_DIR:+$BINARIES_DIR/..}}
 if [ -n "$BUILD_ROOT" ] && [ -d "$BUILD_ROOT" ]; then
     # Counted and announced rather than silent: this runs where nobody looks,

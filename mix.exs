@@ -1,8 +1,8 @@
-defmodule NervesSystemSige5.MixProject do
+defmodule NervesSystemRecomputerIndustrialRk3576.MixProject do
   use Mix.Project
 
-  @github_organization "isaiahdw"
-  @app :nerves_system_sige5
+  @github_organization "alde103"
+  @app :nerves_system_recomputer_industrial_rk3576
   @source_url "https://github.com/#{@github_organization}/#{@app}"
   @version Path.join(__DIR__, "VERSION")
            |> File.read!()
@@ -69,7 +69,7 @@ defmodule NervesSystemSige5.MixProject do
   defp deps do
     [
       {:nerves, "~> 1.11", runtime: false},
-      {:nerves_system_br, "1.34.0", runtime: false},
+      {:nerves_system_br, "1.35.3", runtime: false},
       {:nerves_toolchain_aarch64_nerves_linux_gnu, "~> 15.3.0", runtime: false},
       {:nerves_system_linter, "~> 0.4", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.22", only: :docs, runtime: false}
@@ -77,7 +77,7 @@ defmodule NervesSystemSige5.MixProject do
   end
 
   defp description do
-    "Nerves system for the ArmSoM Sige5 / Banana Pi BPI-M5 Pro (Rockchip RK3576)"
+    "Nerves system for the Seeed reComputer Industrial RK3576"
   end
 
   defp docs do
@@ -102,7 +102,6 @@ defmodule NervesSystemSige5.MixProject do
 
   defp package_files do
     [
-      
       "fwup_include",
       "linux",
       "package",

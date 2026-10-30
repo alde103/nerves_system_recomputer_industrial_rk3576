@@ -66,80 +66,14 @@ BR2_PACKAGE_HOST_UBOOT_TOOLS=y
 BR2_PACKAGE_HOST_UBOOT_TOOLS_ENVIMAGE=y
 BR2_PACKAGE_HOST_UBOOT_TOOLS_ENVIMAGE_SOURCE="${NERVES_DEFCONFIG_DIR}/uboot/uboot.env"
 BR2_PACKAGE_HOST_UBOOT_TOOLS_ENVIMAGE_SIZE="131072"
-BR2_NERVES_SYSTEM_NAME="nerves_system_sige5"
+BR2_NERVES_SYSTEM_NAME="nerves_system_recomputer_industrial_rk3576"
 BR2_NERVES_ADDITIONAL_IMAGE_FILES="${NERVES_DEFCONFIG_DIR}/fwup.conf ${NERVES_DEFCONFIG_DIR}/extlinux-a.conf ${NERVES_DEFCONFIG_DIR}/extlinux-b.conf ${NERVES_DEFCONFIG_DIR}/uboot/u-boot-rockchip.bin"
 BR2_PACKAGE_NBTTY=y
-# Onboard WiFi (board v1.2+): Synaptics SYN43752 (BCM43752/AP6275S) on
-# SDIO, driven by the in-kernel brcmfmac. The firmware, CLM blob and
-# NVRAM are not in upstream linux-firmware; package/brcmfmac43752-firmware
-# installs them from the Armbian firmware collection. v1.0/1.1 boards
-# have an RTL8852BS with no mainline driver. Bluetooth (uart4 serdev)
-# is not brought up.
-BR2_PACKAGE_BRCMFMAC43752_FIRMWARE=y
-# NPU: vendor rknpu kernel driver ported to mainline (out-of-tree module,
-# CMA buffers, fixed 600 MHz clock - see package/rknpu-driver and
-# linux/0002) plus the matching librknnrt 2.3.2 runtime.
-BR2_PACKAGE_RKNPU_DRIVER=y
-BR2_PACKAGE_LIBRKNNRT=y
 BR2_PACKAGE_NERVES_CONFIG=y
 BR2_PACKAGE_NERVES_CONFIG_ACCEPT_RNG_NOTICE=y
-# GPU userspace: Mesa panfrost (EGL/GLES2 over GBM/KMS; no X11 or
-# Wayland ships in the system). Buildroot requires LLVM in the target
-# Mesa for panfrost - the real requirement is the host-side shader
-# precompiler (mesa_clc/panfrost_compile); the target-LLVM link is
-# packaging conservatism that costs rootfs size, acceptable on this
-# class of board. kmscube is included as a GL smoke test.
-BR2_PACKAGE_MESA3D=y
-BR2_PACKAGE_MESA3D_LLVM=y
-BR2_PACKAGE_MESA3D_GALLIUM_DRIVER_PANFROST=y
-BR2_PACKAGE_MESA3D_GBM=y
-BR2_PACKAGE_MESA3D_OPENGL_EGL=y
-BR2_PACKAGE_MESA3D_OPENGL_ES=y
-BR2_PACKAGE_KMSCUBE=y
-# glmark2 measures GPU frequency scaling: its drm-glesv2 flavor renders
-# off-screen through GBM, so a scene can be made fragment-bound and its
-# frame rate read without a display in the loop. stress-ng's --gpu class
-# runs many contexts at once, which exercises the runtime-PM/DVFS seam
-# that a single-context benchmark does not.
-BR2_PACKAGE_GLMARK2=y
-BR2_PACKAGE_STRESS_NG=y
 # Input: eudev (dynamic /dev) and libinput, the input layer DRM/KMS UI
 # stacks read USB keyboards/mice/touchscreens through. No UI toolkit ships
 # in the system — bring your own (a Flutter embedder, LVGL, Slint, Qt, ...)
 # from the application side.
 BR2_ROOTFS_DEVICE_CREATION_DYNAMIC_EUDEV=y
 BR2_PACKAGE_LIBINPUT=y
-# Audio: HDMI audio and the onboard analog ES8388 codec, both in the
-# mainline dts. ALSA userspace: aplay/amixer/alsactl + speaker-test.
-BR2_PACKAGE_ALSA_LIB=y
-BR2_PACKAGE_ALSA_UTILS=y
-BR2_PACKAGE_ALSA_UTILS_APLAY=y
-BR2_PACKAGE_ALSA_UTILS_AMIXER=y
-BR2_PACKAGE_ALSA_UTILS_ALSACTL=y
-BR2_PACKAGE_ALSA_UTILS_SPEAKER_TEST=y
-# Secure world userspace. tee-supplicant is the non-secure half OP-TEE calls
-# back into: it serves the secure world's storage and RPMB requests, so
-# nothing that keeps a key in OP-TEE works without it running.
-#
-# Harmless with no BL32 in the image, which is the default: /dev/tee0 never
-# appears, and the supplicant simply finds nothing to attach to. See the
-# secure-world section of the README.
-#
-# optee-test (xtest) is deliberately not enabled: it depends on
-# BR2_TARGET_OPTEE_OS, i.e. on buildroot building OP-TEE from source, which
-# scripts/build-uboot.sh does outside buildroot.
-BR2_PACKAGE_OPTEE_CLIENT=y
-
-# optee-key: generate and use a device key inside the PKCS#11 TA. Its serve
-# mode holds one TEE session open for a caller that keeps the process running.
-# See package/optee-key/src/optee-key.c.
-BR2_PACKAGE_OPTEE_KEY=y
-
-# libp11 is OpenSSL's engine for PKCS#11 modules, at engines-3/pkcs11.so.
-# Selecting it is also what turns the ENGINE API on in libopenssl, which
-# erlang's crypto needs before it will load any engine at all.
-#
-# The application talks to the secure world through package/optee-key instead;
-# this is here for code that wants OpenSSL to do it.
-BR2_PACKAGE_LIBP11=y
-
