@@ -12,9 +12,10 @@ It runs Seeed's vendor kernel
 6.1) and Radxa's vendor U-Boot with Seeed's Industrial patches, so the board's
 device tree and drivers are the ones Seeed ships and supports.
 
-**Status: not yet verified on hardware.** The image builds and its layout is
-checked by `scripts/verify-system.sh`; boot, OTA and peripherals still need a
-board.
+**Status: not yet verified on hardware.** The system builds, a firmware built
+on it produces an eMMC image, and `scripts/verify-system.sh` checks the kernel
+config, device tree, WiFi module and image layout. Boot, OTA and peripherals
+still need a board.
 
 ## Scope
 
@@ -51,7 +52,12 @@ with automatic revert. See `fwup_include/fwup-common.conf` for the layout and
 ```sh
 mix deps.get
 mix compile
+scripts/verify-system.sh .nerves/artifacts/nerves_system_recomputer_industrial_rk3576-portable-$(cat VERSION)
 ```
+
+Buildroot 2026.08 needs a recent host compiler; Ubuntu 20.04's GCC 9 cannot
+build its host tools. `scripts/build-uboot.sh` rebuilds the committed
+bootloader in Docker.
 
 ### Using in an application
 

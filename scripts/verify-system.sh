@@ -145,6 +145,22 @@ check_module_vermagic() {
     esac
 }
 
+# check_image_layout IMAGE: a `fwup -t complete` image puts the idblock where
+# the boot ROM looks (sector 64), the U-Boot FIT where the SPL loads it
+# (8 MiB) and the Nerves environment where U-Boot reads it (15 MiB). Off by a
+# sector and the board stays in Maskrom, or boots without A/B.
+check_image_layout() {
+    [ "$(od -An -c -j 32768 -N4 "$1" | tr -d ' ')" = "RKNS" ] ||
+        fail "check_image_layout: no RKNS idblock at byte 32768 of $1"
+    [ "$(od -An -tx1 -j $((8 * 1024 * 1024)) -N4 "$1" | tr -d ' ')" = "d00dfeed" ] ||
+        fail "check_image_layout: no FIT at 8 MiB of $1"
+    # grep -c reads to the end; grep -q would SIGPIPE dd under pipefail.
+    [ "$(dd if="$1" bs=1024 skip=$((15 * 1024)) count=128 2>/dev/null | tr '\0' '\n' |
+        grep -cx 'nerves_fw_active=a')" -ge 1 ] ||
+        fail "check_image_layout: no nerves_fw_active=a in the environment at 15 MiB of $1"
+    ok "check_image_layout $(basename "$1")"
+}
+
 check_defconfig_clean
 check_names_consistent
 check_bootloader
@@ -182,3 +198,7 @@ check_module_vermagic wq_wlan
 check_target_file /lib/firmware/wq9201_fw_wifi_1_1_sdio.bin
 check_target_file /lib/firmware/wq_wlan_settings.ini
 check_target_file /usr/sbin/load-board-modules
+
+if [ -n "$IMAGE" ]; then
+    check_image_layout "$IMAGE"
+fi
