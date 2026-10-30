@@ -5,6 +5,7 @@ BR2_TOOLCHAIN_EXTERNAL_CUSTOM=y
 BR2_TOOLCHAIN_EXTERNAL_DOWNLOAD=y
 BR2_TOOLCHAIN_EXTERNAL_URL="https://github.com/nerves-project/toolchains/releases/download/v15.3.0/nerves_toolchain_aarch64_nerves_linux_gnu-linux_${shell uname -m}-15.3.0-8DAF9F3.tar.xz"
 BR2_TOOLCHAIN_EXTERNAL_CUSTOM_PREFIX="aarch64-nerves-linux-gnu"
+BR2_TOOLCHAIN_EXTERNAL_GCC_15=y
 BR2_TOOLCHAIN_EXTERNAL_HEADERS_6_0=y
 BR2_TOOLCHAIN_EXTERNAL_CUSTOM_GLIBC=y
 # BR2_TOOLCHAIN_EXTERNAL_INET_RPC is not set
@@ -25,18 +26,20 @@ BR2_ROOTFS_OVERLAY="${BR2_EXTERNAL_NERVES_PATH}/board/nerves-common/rootfs_overl
 BR2_ROOTFS_POST_BUILD_SCRIPT="${NERVES_DEFCONFIG_DIR}/post-build.sh ${BR2_EXTERNAL_NERVES_PATH}/board/nerves-common/post-build.sh"
 BR2_ROOTFS_POST_IMAGE_SCRIPT="${NERVES_DEFCONFIG_DIR}/post-createfs.sh"
 BR2_LINUX_KERNEL=y
-# Mainline LTS. The Sige5 device tree is upstream; the only board patch
-# is linux/0001 (mmc aliases so the eMMC is mmcblk0, watchdog enable).
-BR2_LINUX_KERNEL_CUSTOM_VERSION=y
-BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="6.18.40"
+BR2_LINUX_KERNEL_CUSTOM_TARBALL=y
+# Seeed-Studio/linux-rockchip branch rk3576-industrial (Rockchip BSP 6.1,
+# kernel 6.1.172) pinned to a commit. It carries the reComputer Industrial
+# device tree and Seeed's drivers (RK3576 CAN-FD, PCF8563T watchdog).
+BR2_LINUX_KERNEL_CUSTOM_TARBALL_LOCATION="https://github.com/Seeed-Studio/linux-rockchip/archive/d9204f086ffd10f613927f57973605a6c205c73e.tar.gz"
 BR2_LINUX_KERNEL_PATCH="${NERVES_DEFCONFIG_DIR}/linux"
-# arm64 defconfig plus the Nerves fragment (built-in storage/net/display
-# and Nerves requirements, documented inline).
-BR2_LINUX_KERNEL_USE_ARCH_DEFAULT_CONFIG=y
-BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="${NERVES_DEFCONFIG_DIR}/linux/nerves.config"
+# The vendor defconfig Seeed builds with, plus the Nerves requirements and
+# the board's own drivers.
+BR2_LINUX_KERNEL_USE_DEFCONFIG=y
+BR2_LINUX_KERNEL_DEFCONFIG="rockchip_linux"
+BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="${NERVES_DEFCONFIG_DIR}/linux/nerves.config ${NERVES_DEFCONFIG_DIR}/linux/industrial.config"
 BR2_LINUX_KERNEL_DTS_SUPPORT=y
 # The .dtb basename must match the devicetree.dtb resource in fwup.conf.
-BR2_LINUX_KERNEL_INTREE_DTS_NAME="rockchip/rk3576-armsom-sige5"
+BR2_LINUX_KERNEL_INTREE_DTS_NAME="rockchip/rk3576-recomputer-industrial"
 BR2_LINUX_KERNEL_NEEDS_HOST_OPENSSL=y
 BR2_PACKAGE_BUSYBOX_CONFIG="${BR2_EXTERNAL_NERVES_PATH}/board/nerves-common/busybox.config"
 BR2_PACKAGE_BUSYBOX_CONFIG_FRAGMENT_FILES="${NERVES_DEFCONFIG_DIR}/busybox.fragment"
