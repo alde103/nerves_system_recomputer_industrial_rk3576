@@ -6,9 +6,9 @@ texts are in LICENSES/.
 | Content | License |
 | --- | --- |
 | Build configuration, fwup configs, scripts, docs (this project's own files) | GPL-2.0-or-later |
-| `uboot/u-boot-rockchip.bin` (committed binary) | GPL-2.0-or-later (U-Boot; corresponding source and build recipe in `scripts/build-uboot.sh`) + Rockchip proprietary blobs (RK3576 DDR init, boost, BL31 from armbian/rkbin — LICENSES/LICENSE.rockchip-rkbin, redistributable on Rockchip SoCs) |
-| `uboot/rk3576_spl_loader_v1.03.102.bin` (committed binary) | Rockchip proprietary (rkbin components — LICENSES/LICENSE.rockchip-rkbin) |
-| `package/wq9201s-wifi/src/` (WQ9201S WiFi driver, vendored from Seeed's wq9201s-wifi-bt-dkms) | GPL-2.0-or-later (WuQi Micro, see `package/wq9201s-wifi/src/copyright`) |
+| `uboot/u-boot-rockchip.bin` (committed binary) | GPL-2.0-or-later (U-Boot; corresponding source and build recipe in `scripts/build-uboot.sh`) + Rockchip proprietary blobs (RK3576 DDR init, boost, BL31 from armbian/rkbin — Rockchip Binary Software License Agreement, LICENSES/LICENSE.rockchip-rkbin: binary-only, unmodified, distributed with platforms that incorporate Rockchip ICs, with the agreement included) |
+| `uboot/rk3576_spl_loader_v1.03.102.bin` (committed binary) | Rockchip proprietary (rkbin components — Rockchip Binary Software License Agreement, LICENSES/LICENSE.rockchip-rkbin) |
+| `package/wq9201s-wifi/src/` (WQ9201S WiFi driver, vendored unmodified from Seeed's wq9201s-wifi-bt-dkms 2.2.3.94-2) | GPL-2.0-or-later per Seeed's `debian/copyright` (`package/wq9201s-wifi/src/copyright`); the module declares `MODULE_LICENSE("Dual BSD/GPL")`. **Conflicting notices:** nine files (`app/fw_dbg.*`, `app/fw_log.*`, `misc/coex.*`, `misc/dtop_main.*`, `ipc/hif/pcie/pcie_dnld.c`) carry a WuQi header calling them proprietary and not to be copied. The GPL grant here rests on Seeed's packaging, which ships those same files under it. |
 
 Downloaded at build time (not in this repository): the WQ9201S WiFi/BT
 firmware and settings (WuQi Micro proprietary, redistributed by Seeed with the

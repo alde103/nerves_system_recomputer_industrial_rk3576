@@ -31,8 +31,11 @@ Licensing of the committed binaries: U-Boot itself is GPL-2.0-or-later
 plus the patches and script named above). The DDR-init, boost and BL31
 components inside `u-boot-rockchip.bin` and all of
 `rk3576_spl_loader_v1.03.102.bin` are Rockchip proprietary blobs from
-[armbian/rkbin](https://github.com/armbian/rkbin), redistributable per
-`LICENSES/LICENSE.rockchip-rkbin`.
+[armbian/rkbin](https://github.com/armbian/rkbin), under Rockchip's Binary
+Software License Agreement (`LICENSES/LICENSE.rockchip-rkbin`, the
+`LICENSE.TXT` of the pinned rkbin commit): redistribution is binary-only,
+unmodified, with platforms that incorporate Rockchip ICs, and with the
+agreement included.
 
 ## Boot and automatic revert
 

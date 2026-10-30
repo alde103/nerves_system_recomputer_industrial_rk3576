@@ -36,7 +36,7 @@ Not supported: NPU, GPU/video, Bluetooth, LoRa, NVMe and OP-TEE.
 | CAN-FD | `rk3576_canfd` | `can0` |
 | WiFi | `wq_wlan` (out-of-tree, `package/wq9201s-wifi`) | loaded at boot by `load-board-modules` |
 | RTC | `rtc-pcf8563` / `rtc-pcf85063` | |
-| Watchdog | SoC `dw_wdt` | |
+| Watchdog | `rtc-pcf8563` (PCF8563T, wired to the reset circuit) | `/dev/watchdog0`, armed by nerves_heart |
 | Console | `ttyFIQ0`, 1500000 baud | CH343P on USB-C1 |
 
 ## Boot architecture

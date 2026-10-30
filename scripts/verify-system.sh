@@ -84,13 +84,11 @@ check_kernel_config() {
     ok "check_kernel_config $1=$2"
 }
 
-# check_dtb_alias ALIAS COMPATIBLE_SUBSTRING: in the shipped DTB, ALIAS points
-# at a node whose compatible contains COMPATIBLE_SUBSTRING. Nerves expects the
-# eMMC at mmcblk0, and the vendor kernel numbers mmcblk devices by alias.
-check_dtb_alias() {
-    local compatible
-    compatible=$(python3 -I - "$ARTIFACT_DIR/images/$DTB_NAME.dtb" "$1" <<'EOF'
-import struct, sys
+# dtb_dump: every property of the shipped DTB as "<node path> <name>=<value>",
+# strings as text (lists joined with spaces), anything else as hex.
+dtb_dump() {
+    python3 -I - "$ARTIFACT_DIR/images/$DTB_NAME.dtb" <<'EOF'
+import re, struct, sys
 
 blob = open(sys.argv[1], "rb").read()
 magic, _, off_struct, off_strings = struct.unpack(">IIII", blob[:16])
@@ -99,30 +97,55 @@ assert magic == 0xD00DFEED, "not a DTB"
 def name_at(off):
     return blob[off:blob.index(b"\0", off)].decode()
 
-nodes, path, pos = {}, [], off_struct
+def text(value):
+    if re.fullmatch(rb"([\x20-\x7e]+\0)+", value):
+        return value.rstrip(b"\0").replace(b"\0", b" ").decode()
+    return value.hex()
+
+path, pos = [], off_struct
 while True:
     (token,) = struct.unpack(">I", blob[pos:pos + 4]); pos += 4
     if token == 1:  # FDT_BEGIN_NODE
         name = name_at(pos); pos += (len(name) + 4) & ~3
         path.append(name)
-        nodes["/" + "/".join(p for p in path if p)] = {}
     elif token == 2:  # FDT_END_NODE
         path.pop()
     elif token == 3:  # FDT_PROP
         length, nameoff = struct.unpack(">II", blob[pos:pos + 8]); pos += 8
         value = blob[pos:pos + length]; pos += (length + 3) & ~3
-        nodes["/" + "/".join(p for p in path if p)][name_at(off_strings + nameoff)] = value
+        node = "/" + "/".join(p for p in path if p)
+        print(f"{node} {name_at(off_strings + nameoff)}={text(value)}")
     elif token == 9:  # FDT_END
         break
-
-target = nodes.get("/aliases", {}).get(sys.argv[2], b"").rstrip(b"\0").decode()
-print(nodes.get(target, {}).get("compatible", b"").replace(b"\0", b" ").decode())
 EOF
-)
+}
+
+# check_dtb_alias ALIAS COMPATIBLE_SUBSTRING: in the shipped DTB, ALIAS points
+# at a node whose compatible contains COMPATIBLE_SUBSTRING. Nerves expects the
+# eMMC at mmcblk0, and the vendor kernel numbers mmcblk devices by alias.
+check_dtb_alias() {
+    local target compatible
+    target=$(echo "$DTB" | sed -n "s|^/aliases $1=||p")
+    compatible=$(echo "$DTB" | sed -n "s|^$target compatible=||p")
     case "$compatible" in
     *"$2"*) ok "check_dtb_alias $1 -> $compatible" ;;
-    *) fail "check_dtb_alias: $1 points at '$compatible', want *$2*" ;;
+    *) fail "check_dtb_alias: $1 points at '$target' ($compatible), want *$2*" ;;
     esac
+}
+
+# check_single_watchdog: exactly one enabled watchdog in the DTB, so
+# /dev/watchdog0, the one nerves_heart arms, is a known device. Seeed's tree
+# has the carrier's PCF8563T (nxp,timer-watchdog, wired to the reset circuit)
+# and the SoC's dw-wdt.
+check_single_watchdog() {
+    local nodes node enabled=""
+    nodes=$(echo "$DTB" | sed -n 's/^\([^ ]*\) \(compatible=.*snps,dw-wdt.*\|nxp,timer-watchdog=.*\)$/\1/p' | sort -u)
+    for node in $nodes; do
+        grep -qx "$node status=disabled" <<<"$DTB" || enabled="$enabled $node"
+    done
+    [ "$(echo $enabled | wc -w)" -eq 1 ] ||
+        fail "check_single_watchdog: enabled watchdogs:${enabled:- none}"
+    ok "check_single_watchdog$enabled"
 }
 
 # check_target_file PATH: PATH is in the rootfs.
@@ -165,7 +188,9 @@ check_defconfig_clean
 check_names_consistent
 check_bootloader
 
+DTB=$(dtb_dump)
 check_dtb_alias mmc0 dwcmshc
+check_single_watchdog
 
 # Serial: the CH344 behind RS485/RS232 is CDC-ACM compliant (ttyACM*)
 check_kernel_config CONFIG_USB_ACM y
@@ -177,10 +202,9 @@ check_kernel_config CONFIG_CAN_GW y
 check_kernel_config CONFIG_CANFD_RK3576 y
 # Ethernet PHY on gmac0 (gmac1's Maxio PHY runs on the generic driver)
 check_kernel_config CONFIG_REALTEK_PHY y
-# RTC on the SoM, PCF8563T watchdog on the carrier, SoC watchdog
+# RTC on the SoM; PCF8563T on the carrier, the watchdog
 check_kernel_config CONFIG_RTC_DRV_PCF85063 y
 check_kernel_config CONFIG_RTC_DRV_PCF8563 y
-check_kernel_config CONFIG_DW_WATCHDOG y
 check_kernel_config CONFIG_WATCHDOG_NOWAYOUT y
 # Storage: eMMC, squashfs rootfs, f2fs app partition
 check_kernel_config CONFIG_MMC_SDHCI_OF_DWCMSHC y
