@@ -1,5 +1,8 @@
 # Nerves System for the Seeed reComputer Industrial RK3576
 
+> [!WARNING]
+> Not tested on hardware yet. See [Status](#status).
+
 A [Nerves](https://nerves-project.org) system for the
 [Seeed reComputer Industrial RK3576](https://www.seeedstudio.com/reComputer-Industrial-RK3576-0864-p-7015.html):
 a DIN-rail industrial PC on the Rockchip RK3576 (4x Cortex-A72 + 4x
@@ -12,10 +15,12 @@ It runs Seeed's vendor kernel
 6.1) and Radxa's vendor U-Boot with Seeed's Industrial patches, so the board's
 device tree and drivers are the ones Seeed ships and supports.
 
-**Status: not yet verified on hardware.** The system builds, a firmware built
+## Status
+
+This system has not been tested on hardware yet. It builds, a firmware built
 on it produces an eMMC image, and `scripts/verify-system.sh` checks the kernel
-config, device tree, WiFi module and image layout. Boot, OTA and peripherals
-still need a board.
+config, device tree, WiFi module and image layout. Boot, the Maskrom flashing
+steps, A/B updates and every peripheral still need to be confirmed on a board.
 
 ## Scope
 

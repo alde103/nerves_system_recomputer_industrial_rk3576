@@ -4,6 +4,7 @@
 
 Initial release, forked from
 [nerves_system_sige5](https://github.com/isaiahdw/nerves_system_sige5) v0.2.0.
+Not tested on hardware yet.
 
 - Seeed's vendor kernel (linux-rockchip `rk3576-industrial`, 6.1) with the
   reComputer Industrial device tree.
